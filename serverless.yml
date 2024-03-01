@@ -1,0 +1,117 @@
+service: UsersTasks
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/Users"
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/Tasks"
+
+
+functions:
+  #----------------- USER APIs---------------
+  CreateUser:
+    handler: Functions/Users.createUser
+    events:
+      - httpApi:
+          path: /user
+          method: POST
+  getUser:
+    handler: Functions/Users.getUser
+    events:
+      - httpApi:
+          path: /user/{UserId}
+          method: GET
+  getAllUser:
+    handler: Functions/Users.getUser
+    events:
+      - httpApi:
+          path: /user
+          method: GET
+  updateUser:
+    handler: Functions/Users.updateUser
+    events:
+      - httpApi:
+          path: /user/{UserId}
+          method: PUT
+  deleteUser:
+    handler: Functions/Users.deleteUser
+    events:
+      - httpApi:
+          path: /user/{UserId}
+          method: DELETE
+
+
+  #----------------- TASKS APIs---------------
+  createTask:
+    handler: Functions/Tasks.createTask
+    events:
+      - httpApi:
+          path: /task
+          method: POST
+  getTask:
+    handler: Functions/Tasks.getTask
+    events:
+      - httpApi:
+          path: /task/{TaskId}
+          method: GET
+  getAllTasks:
+    handler: Functions/Tasks.getTask
+    events:
+      - httpApi:
+          path: /task
+          method: GET
+  updateTask:
+    handler: Functions/Tasks.updateTask
+    events:
+      - httpApi:
+          path: /task/{TaskId}
+          method: PUT   
+  deleteTask:
+    handler: Functions/Tasks.deleteTask
+    events:
+      - httpApi:
+          path: /task/{TaskId}
+          method: DELETE
+
+
+
+
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Users
+        AttributeDefinitions:
+          - AttributeName: UserId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: UserId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+    TaskTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tasks
+        AttributeDefinitions:
+          - AttributeName: TaskId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: TaskId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+
